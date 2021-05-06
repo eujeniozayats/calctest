@@ -13,7 +13,7 @@ using System.IO;
 using System.Reflection;
 using System.Threading;
 
-namespace GlowQA
+namespace StandaloneCalculator
 {
     [TestFixture]
     public partial class CalcTests
@@ -26,33 +26,36 @@ namespace GlowQA
             
             ChromeOptions options = new ChromeOptions();
             options.PageLoadStrategy = PageLoadStrategy.Normal;
-            options.AddArgument("--headless");
+            //options.AddArgument("--headless");
             _driver = new ChromeDriver(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), options);
         }
 
         static string[] Scopes = { SheetsService.Scope.Spreadsheets };
         static string ApplicationName = "Google Sheets API .NET Quickstart";
 
-        [Test, TestCaseSource(nameof(GetData))]
+        [TestCaseSource(nameof(GetData))]
         public void TestExecution(TestData data)
         {
             CalcPage page = new CalcPage(_driver);
             WebDriverWait wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(10));
-            
-            _driver.Url = "https://fincalc.platform.uat.glowfinsvs.com/";
+            _driver.Manage().Window.Maximize();
+
+            _driver.Url = "https://fincalc.platform.dev.glowfinsvs.com/";
             IJavaScriptExecutor executor = (IJavaScriptExecutor)_driver;
             string js = "arguments[0].type = 'text';";
             executor.ExecuteScript(js, page.UpfrontPaymentPercentField);
             executor.ExecuteScript(js, page.TermValue);
-            page.InputField.Clear();
-            page.InputField.SendKeys(data.Price);
-            Thread.Sleep(2000);
-            page.TermValue.SendKeys(data.Term);
-            page.TermValue.SendKeys(Keys.Enter);
             page.UpfrontPaymentPercentField.SendKeys(data.UpfrontPaymentPercents);
             page.UpfrontPaymentPercentField.SendKeys(Keys.Enter);
+            page.InputField.Clear();
+            page.InputField.SendKeys(data.Price);
+            page.InputField.SendKeys(Keys.Enter);
+            page.TermValue.SendKeys(data.Term);
+            page.TermValue.SendKeys(Keys.Enter);
+            CalcPage page1 = new CalcPage(_driver);
+            Console.WriteLine(page1.UpFront.GetAttribute("value") + " TESTDATA");
             Thread.Sleep(2000);
-
+    
 
             DateTime localDate = DateTime.Now;
 
@@ -60,7 +63,9 @@ namespace GlowQA
                 & page.UpFront.Text.Equals(data.UpfrontPaymentValue)
                 & page.TotalBorrowed.Text.Equals(data.TotalBorrowed)
                 & page.MonthlyPayment.Text.Equals(data.MonthlyPayment)
-                & page.TotalCost.Text.Equals(data.CostOfCredit))
+                & page.TotalCost.Text.Equals(data.CostOfCredit)
+                )
+
             {
                 Write(new List<object> { "PASS: " + localDate }, data.RownNumber);
             }
@@ -69,10 +74,7 @@ namespace GlowQA
                 Write(new List<object> { "FAIL: " + localDate }, data.RownNumber);
             }
 
-
         }
-
-
 
 
         [TearDown]

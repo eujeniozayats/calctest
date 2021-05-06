@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace GlowQA
+﻿namespace StandaloneCalculator
 {
     public partial class CalcTests
     {

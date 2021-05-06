@@ -1,7 +1,7 @@
 ﻿using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 
-namespace GlowQA
+namespace StandaloneCalculator
 {
     public class CalcPage
     {
